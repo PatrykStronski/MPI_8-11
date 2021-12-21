@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "mpi.h"
 
-#define SIZE 100
+#define SIZE 1000000
 
 using namespace std;
 
@@ -33,6 +33,8 @@ int main(int argc, char** argv) {
         vec_sum_loc += vec_base[i];
     }
 
+    start = MPI_Wtime();
+
     for (int range = 2; range <= size; range *= 2) {
         if ((rank /range) * range + range/2 == rank) {
             MPI_Send(&vec_sum_loc, 1, MPI_INT, (rank /range) * range , range, MPI_COMM_WORLD);
@@ -42,8 +44,11 @@ int main(int argc, char** argv) {
         }
     }
 
+    finish = MPI_Wtime();
+
     if (rank == 0) {
-        cout<<vec_sum_loc<<endl;
+        cout<<"sum is: " << vec_sum_loc<<endl;
+        cout<<"The elapsed time for P2P process is "<< finish- start << "seconds" << endl;
     }
     
     MPI_Finalize();

@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "mpi.h"
 
-#define SIZE 100
+#define SIZE 1000000
 
 using namespace std;
 
