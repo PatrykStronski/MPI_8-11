@@ -7,8 +7,8 @@ int main(int argc, char **argv)
 {
 	int rank, size;
 	MPI_Status statusf, statusb;
-	int msg_forward = 13;
-	int msg_backward = -13;
+	int msg_forward = 10;
+	int msg_backward = -10;
 
 	int recvf = 0;
 
