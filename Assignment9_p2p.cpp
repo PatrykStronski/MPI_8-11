@@ -34,10 +34,10 @@ int main(int argc, char** argv) {
     }
 
     for (int range = 2; range <= size; range *= 2) {
-        if (rank % range != 0) {
-            MPI_Send(&vec_sum_loc, 1, MPI_INT, rank - 1, range, MPI_COMM_WORLD);
-        } else {
-            MPI_Recv(&vec_sum, 1, MPI_INT, rank + 1, range, MPI_COMM_WORLD, &status);
+        if ((rank /range) * range + range/2 == rank) {
+            MPI_Send(&vec_sum_loc, 1, MPI_INT, (rank /range) * range , range, MPI_COMM_WORLD);
+        } else if (rank % range == 0) {
+            MPI_Recv(&vec_sum, 1, MPI_INT, (rank /range) * range + range/2, range, MPI_COMM_WORLD, &status);
             vec_sum_loc += vec_sum;
         }
     }
