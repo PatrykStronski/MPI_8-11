@@ -35,17 +35,14 @@ int main(int argc, char** argv) {
     for (int i = strt; i < end; i++){
         vec_sum_loc += vec_base[i];
     }
-
-    MPI_Reduce(&vec_sum_loc, &vec_sum, 1, MPI_INT, MPI_SUM, batch_size * (rank / batch_size), MPI_COMM_WORLD);
-
-    if (rank % 2 != 0) {
-        vec_sum = 0;
-    }
-
-    MPI_Reduce(&vec_sum, &vec_summed_sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    
+    start = MPI_Wtime();
+    MPI_Reduce(&vec_sum_loc, &vec_sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    finish = MPI_Wtime();
     
     if (rank == 0) {
-        cout << "The final sum is " << vec_summed_sum << endl;
+        cout << "The final sum is " << vec_sum << endl;
+        cout << "The time is "<< finish - start << " seconds" << endl;
     }
     
     MPI_Finalize();

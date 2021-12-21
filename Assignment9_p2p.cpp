@@ -17,31 +17,33 @@ int main(int argc, char** argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     
     int vec_base[SIZE];
-    int vec_recv[SIZE];
+    const int batch_size = SIZE / size;
+    int vec_sum = 0;
+    int vec_sum_loc = 0;
 
     for (int i = 0; i<SIZE; i++) {
         vec_base[i] = 1;
     }
 
+    int strt = batch_size * rank;
+    int end = batch_size * (rank +1);
+    if (rank == size - 1) end = SIZE;
+    
+    for (int i = strt; i < end; i++){
+        vec_sum_loc += vec_base[i];
+    }
 
-    if (rank % 2 != 0) {
-        MPI_Send(&vec_base[0], SIZE, MPI_INT, rank - 1, 0, MPI_COMM_WORLD);
-    } 
-
-    if (rank % 2 == 0) {
-        if (rank != size -1) {
-            MPI_Recv(&vec_recv[0], SIZE, MPI_INT, rank + 1, 0, MPI_COMM_WORLD, &status);
-            for (int i = 0; i < SIZE; i++) vec_base[i] += vec_recv[i];
+    for (int range = 2; range <= size; range *= 2) {
+        if (rank % range != 0) {
+            MPI_Send(&vec_sum_loc, 1, MPI_INT, rank - 1, range, MPI_COMM_WORLD);
+        } else {
+            MPI_Recv(&vec_sum, 1, MPI_INT, rank + 1, range, MPI_COMM_WORLD, &status);
+            vec_sum_loc += vec_sum;
         }
-        if (rank != 0) MPI_Send(&vec_base[0], SIZE, MPI_INT, 0, 1, MPI_COMM_WORLD);
     }
 
     if (rank == 0) {
-        MPI_Recv(&vec_recv[0], SIZE, MPI_INT, 2, 1, MPI_COMM_WORLD, &status);
-            for (int i = 0; i < SIZE; i++) vec_base[i] += vec_recv[i];
-        
-        cout<<"The results for the first 5 elems"<<endl;
-        cout<<vec_base[0]<<","<<vec_base[1]<<","<<vec_base[2]<<","<<vec_base[3]<<","<<vec_base[4]<<endl;
+        cout<<vec_sum_loc<<endl;
     }
     
     MPI_Finalize();
